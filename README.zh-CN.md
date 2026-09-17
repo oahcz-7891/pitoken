@@ -17,8 +17,11 @@ pi install git:github.com/oahcz-7891/pitoken    # 从 GitHub 安装
 /tokens session             仅当前会话
 /tokens ... flat            全部按 pi 记录的费用计算
 
+## 定价
+
+只有当调用的模型 id 与 `index.ts` 里 `PRICING` 费率表的键**完全相等**时，才用该表计价。其余情况——例如 `accounts/fireworks/models/...` 这类路由 id，或表里没有的任何模型——在报告中标记为 `*`（Approximated），改用 pi 为这次调用记录的 flat cost 计费。这些调用仍然计入总量，只是不按本表的费率。
+
 ## 说明
 
 - 用量读取自 `~/.pi/agent/sessions/**/*.jsonl`（assistant 的 `usage` 字段）。
-- 高峰：周一至周五 09:00–12:00、14:00–18:00（北京时间）；其余时段为低谷，按半价计费。费率见 `index.ts` 里的 `PRICING`。
-- 模型名后的 `*` 表示 Approximated —— 没有峰谷费率表，改用 pi 记录的费用（flat cost）。
+- 费率表是手工维护的：pi 自己的模型目录（`~/.pi/agent/models.json`）不参与计算。
