@@ -1,0 +1,22 @@
+{
+  "name": "pitoken",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "pi extension: /tokens — token & cost report (Claude Code /cost style), split by model and DeepSeek peak/off-peak rates",
+  "keywords": [
+    "pi-package",
+    "pi-extension",
+    "tokens",
+    "cost"
+  ],
+  "pi": {
+    "extensions": [
+      "./index.ts"
+    ]
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": "*",
+    "@earendil-works/pi-tui": "*"
+  }
+}
