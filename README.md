@@ -1,6 +1,6 @@
 # pitoken
 
-`/tokens` — a token & cost report for pi, aggregated from local session logs and split by model and DeepSeek peak / off-peak pricing.
+`/tokens` — a token & cost report for pi, aggregated from local session logs.
 
 [中文](README.zh-CN.md)
 

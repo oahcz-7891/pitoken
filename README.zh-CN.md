@@ -1,6 +1,6 @@
 # pitoken
 
-`/tokens` —— pi 的 token 与费用报告：汇总本地会话日志，按模型和 DeepSeek 峰谷电价拆分。
+`/tokens` —— pi 的 token 与费用报告：汇总本地会话日志。
 
 [English](README.md)
 
