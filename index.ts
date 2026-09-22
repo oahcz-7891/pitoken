@@ -18,7 +18,7 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import { getAgentDir } from "@earendil-works/pi-coding-agent";
 import type { ExtensionAPI, ExtensionCommandContext } from "@earendil-works/pi-coding-agent";
-import { matchesKey, Text, visibleWidth, type Component } from "@earendil-works/pi-tui";
+import { matchesKey, Text } from "@earendil-works/pi-tui";
 
 // ---------------------------------------------------------------------------
 // Pricing ($ per 1M tokens). Edit freely. Off-peak = half of peak.
@@ -331,8 +331,8 @@ function hitRate(input: number, cacheRead: number, cacheWrite: number): string {
 
 const PERIOD_LABEL: Record<Period, string> = { peak: "peak", offPeak: "off-peak" };
 
-// Money color. The report panel's frame and every cost value share this one
-// theme token, so the border always matches the amounts (and follows the theme).
+// Money color. Every cost value in the report uses this one theme token, so the
+// amounts stay visually consistent (and follow the theme).
 const AMOUNT_COLOR = "success";
 
 interface HeaderLine {
@@ -413,42 +413,6 @@ function formatThemed(r: Report, theme: ExtensionCommandContext["ui"]["theme"]):
 	return lines;
 }
 
-/**
- * Draws its children inside a rounded frame:
- *
- *   ╭──────────────╮
- *   │ Token Usage  │
- *   ╰──────────────╯
- *
- * Children are rendered at width - 4 so each line gets one space of inner
- * padding on both sides of the frame.
- */
-class RoundedFrame implements Component {
-	constructor(
-		private readonly children: Component[],
-		private readonly color: (s: string) => string,
-	) {}
-
-	invalidate(): void {
-		for (const child of this.children) child.invalidate?.();
-	}
-
-	render(width: number): string[] {
-		const w = Math.max(4, width);
-		const inner = w - 4; // "│ " + content + " │"
-		const edge = (left: string, right: string) => this.color(left + "─".repeat(w - 2) + right);
-		const out: string[] = [edge("╭", "╮")];
-		for (const child of this.children) {
-			for (const line of child.render(inner)) {
-				const pad = " ".repeat(Math.max(0, inner - visibleWidth(line)));
-				out.push(this.color("│") + " " + line + pad + " " + this.color("│"));
-			}
-		}
-		out.push(edge("╰", "╯"));
-		return out;
-	}
-}
-
 async function showReport(r: Report, ctx: ExtensionCommandContext): Promise<void> {
 	const plain = formatPlain(r);
 	if (!ctx.hasUI) return;
@@ -457,13 +421,14 @@ async function showReport(r: Report, ctx: ExtensionCommandContext): Promise<void
 		return;
 	}
 	await ctx.ui.custom((_tui, theme, _kb, done) => {
-		const children: Component[] = [];
-		for (const line of formatThemed(r, theme)) children.push(new Text(line, 0, 0));
-		children.push(new Text(theme.fg("dim", "Press Enter or Esc to close"), 0, 0));
-		const frame = new RoundedFrame(children, (s: string) => theme.fg(AMOUNT_COLOR, s));
+		const children: Text[] = [];
+		for (const line of formatThemed(r, theme)) children.push(new Text(line, 1, 0));
+		children.push(new Text(theme.fg("dim", "Press Enter or Esc to close"), 1, 0));
 		return {
-			render: (width: number) => frame.render(width),
-			invalidate: () => frame.invalidate(),
+			render: (width: number) => children.flatMap((child) => child.render(width)),
+			invalidate: () => {
+				for (const child of children) child.invalidate?.();
+			},
 			handleInput: (data: string) => {
 				if (matchesKey(data, "enter") || matchesKey(data, "escape") || data === "q") done(undefined);
 			},
